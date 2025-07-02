@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的 GitHub Pages 作品集</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center; /* 水平居中內容 */
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px; /* 限制寬度以獲得更好的外觀 */
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* 元素之間的間距 */
+            align-items: center; /* 在彈性容器中垂直居中項目 */
+        }
+        .nav-button {
+            /* 常規按鈕樣式 - 顏色將被下面的特定類別覆蓋 */
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: inline-block; /* 允許應用填充和寬度 */
+            width: 100%; /* 使按鈕佔據其容器的全部寬度 */
+            text-decoration: none; /* 移除連結下劃線 */
+            box-sizing: border-box; /* 將填充包含在寬度計算中 */
+        }
+        .nav-button:active {
+            transform: translateY(0); /* 點擊時恢復正常 */
+        }
+
+        /* 模態彈出視窗樣式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* 半透明黑色背景 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* 確保它在所有內容之上 */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(-20px); /* 從略上方開始 */
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0); /* 滑入到位 */
+        }
+        .modal-close-button {
+            background-color: #ef4444; /* 關閉按鈕的紅色 */
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+        .modal-close-button:hover {
+            background-color: #dc2626;
+        }
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #334155;
+            margin-bottom: 15px;
+        }
+        .modal-tip-text {
+            font-size: 1.1em;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-4">歡迎來到美食網站！</h1>
+        <p class="text-gray-600 mb-6">點擊下方按鈕探索健康美食：</p>
+
+        <a href="index1.html" class="nav-button bg-red-500 hover:bg-red-600">
+            食物圖片偵測器
+        </a>
+
+        <a href="index2.html" class="nav-button bg-orange-500 hover:bg-orange-600">
+            English food detector
+        </a>
+
+        <a href="index3.html" class="nav-button bg-yellow-500 hover:bg-yellow-600">
+            中式食物偵測器
+        </a>
+
+        <a href="index4.html" class="nav-button bg-green-500 hover:bg-green-600">
+            餐廳推薦
+        </a>
+    </div>
+
+    <div id="healthTipModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">針對患有慢性病長者的健康小貼士！</h2>
+            <p id="randomTipText" class="modal-tip-text"></p>
+            <button class="modal-close-button" onclick="closeModal()">知道了！</button>
+        </div>
+    </div>
+
+    <script>
+        // 健康小貼士陣列，專門為患有高血壓、高血糖和高膽固醇（「三高」疾病）的長者量身定制。
+        const healthyTips = [
+            "**優先選擇低鈉、高纖食物：** 為了血壓和心臟健康，請選擇新鮮水果、蔬菜、全穀物和瘦肉蛋白。限制加工食品，它們通常鈉含量很高。",
+            "**透過明智的選擇監測血糖：** 選擇複合碳水化合物（如燕麥、糙米）和瘦肉蛋白。避免含糖飲料和加工甜食，以有效管理血糖水平。",
+            "**選擇健康脂肪來控制膽固醇：** 攝取不飽和脂肪的來源，如酪梨、堅果、種子和橄欖油。限制油炸食品和許多包裝零食中的飽和脂肪和反式脂肪，以支持心臟健康。",
+            "**定期、經醫生批准的運動：** 根據您的健康狀況進行體育活動，例如快走、游泳或騎自行車。在開始任何新的運動計劃之前，務必諮詢您的醫生。",
+            "**堅持服藥是關鍵：** 嚴格按照醫生的指示服用所有處方藥物，用於控制血壓、血糖和膽固醇。漏服藥物可能導致嚴重的健康後果。",
+            "**多喝白開水保持水分：** 避免飲用含糖飲料，這會導致血糖飆升。水對於腎功能至關重要，有助於管理血壓和整體新陳代謝。",
+            "**有效管理壓力：** 壓力會影響血壓和血糖。練習深呼吸、冥想或溫和的瑜伽等放鬆技巧，有助於控制壓力水平。",
+            "**定期體檢和監測：** 頻繁就醫對於監測您的血壓、血糖和膽固醇水平至關重要。及時與醫生討論任何變化或疑慮。",
+            "**了解食物標籤：** 學習閱讀營養標籤，以識別鈉、糖和不健康脂肪的含量。這使您能夠做出支持健康目標的明智食物選擇。",
+            "**優先保證優質睡眠：** 良好的睡眠有助於調節影響血糖和食慾的激素，並有助於整體心血管健康。目標是每晚獲得 7-9 小時的優質睡眠。"
+        ];
+
+        function showRandomTip() {
+            // 從陣列中獲取一個隨機小貼士
+            const randomIndex = Math.floor(Math.random() * healthyTips.length);
+            const randomTip = healthyTips[randomIndex];
+
+            // 在模態框中顯示小貼士
+            document.getElementById('randomTipText').innerHTML = randomTip; // 使用 innerHTML 以便解析粗體標籤
+
+            // 顯示模態框
+            document.getElementById('healthTipModal').classList.add('show');
+        }
+
+        function closeModal() {
+            // 隱藏模態框
+            document.getElementById('healthTipModal').classList.remove('show');
+        }
+
+        // 頁面加載完成時顯示隨機小貼士
+        window.onload = showRandomTip;
+    </script>
+</body>
+</html>
