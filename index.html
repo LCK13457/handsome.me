@@ -3,174 +3,512 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的 GitHub Pages 作品集</title>
+    <title>食物辨識器</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
-            text-align: center;
-            /* Removed transform: scale(1.75); for better responsiveness */
-            /* Using responsive units and max-width for better scaling on different devices */
+        }
+        .lang-toggle {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .lang-button {
+            padding: 0.5rem 0.9375rem; /* 8px 15px */
+            border-radius: 8px;
+            background-color: #cbd5e1;
+            color: #334155;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .lang-button.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .lang-button:hover:not(.active) {
+            background-color: #94a3b8;
         }
         .container {
             background-color: #ffffff;
-            padding: 30px;
+            padding: 40px;
             border-radius: 15px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 500px; /* Limit width for better appearance */
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
+            max-width: 700px;
+            text-align: center;
         }
-        .nav-button {
-            color: white;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 1.5rem; /* Using rem for better scaling with root font size */
-            transition: background-color 0.3s ease, transform 0.2s ease;
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
             display: inline-block;
+            cursor: pointer;
             width: 100%;
-            text-decoration: none;
-            box-sizing: border-box;
         }
-        .nav-button:active {
-            transform: translateY(0);
-        }
-
-        /* Styles for the Modal Popup */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
+        .file-input-wrapper input[type=file] {
+            position: absolute;
             left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
-        .modal-overlay.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            transform: translateY(-20px);
-            transition: transform 0.3s ease;
-        }
-        .modal-overlay.show .modal-content {
-            transform: translateY(0);
-        }
-        .modal-close-button {
-            background-color: #ef4444;
+        .upload-button {
+            background-color: #4f46e5;
             color: white;
-            padding: 8px 15px;
-            border-radius: 8px;
+            padding: 0.9375rem 1.5625rem; /* 15px 25px */
+            border-radius: 10px;
             font-weight: 600;
-            margin-top: 20px;
-            cursor: pointer;
-            border: none;
+            font-size: 1.15rem; /* Using rem */
             transition: background-color 0.3s ease;
+            display: inline-block;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+        .upload-button:hover {
+            background-color: #4338ca;
+        }
+        #image-preview {
+            max-width: 100%;
+            max-height: 350px;
+            margin-top: 25px;
+            border-radius: 10px;
+            object-fit: contain;
+            display: none;
+        }
+        .action-button {
+            background-color: #10b981;
+            color: white;
+            padding: 0.9375rem 1.875rem; /* 15px 30px */
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.2rem; /* Using rem */
+            transition: background-color 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin-top: 25px;
+        }
+        .action-button:hover {
+            background-color: #059669;
+        }
+        .action-button:disabled {
+            background-color: #a7f3d0;
+            cursor: not-allowed;
+        }
+        #loading-indicator {
+            display: none;
+            margin-top: 25px;
+            font-weight: 500;
+            color: #4b5563;
             font-size: 1.1rem; /* Using rem */
         }
-        .modal-close-button:hover {
-            background-color: #dc2626;
-        }
-        .modal-title {
-            font-size: 2.2rem; /* Using rem */
-            font-weight: bold;
+        #results-area {
+            margin-top: 35px;
+            padding: 25px;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            text-align: left;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            font-size: 1.15rem; /* Using rem */
             color: #334155;
-            margin-bottom: 15px;
+            word-wrap: break-word;
         }
-        .modal-tip-text {
-            font-size: 1.3rem; /* Using rem */
-            color: #4b5563;
-            line-height: 1.6;
+        #results-area p {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        #results-area p:last-child {
+            margin-bottom: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-5xl font-extrabold text-gray-800 mb-4">歡迎來到美食網站！</h1>
-        <p class="text-xl text-gray-600 mb-6">點擊下方按鈕探索健康美食：</p>
-
-        <a href="index1.html" class="nav-button bg-red-500 hover:bg-red-600">
-            食物圖片辨識器
-        </a>
-
-        <a href="index2.html" class="nav-button bg-orange-500 hover:bg-orange-600">
-            FOOD DETECTOR (ENGLISH VERSION)
-        </a>
-
-        <a href="index3.html" class="nav-button bg-yellow-500 hover:bg-yellow-600">
-            中文食物辨識器
-        </a>
-
-        <a href="index4.html" class="nav-button bg-green-500 hover:bg-green-600">
-            餐廳推薦
-        </a>
+    <div class="lang-toggle">
+        <button id="lang-zh" class="lang-button active" data-lang="zh">中文</button>
+        <button id="lang-en" class="lang-button" data-lang="en">English</button>
     </div>
 
-    <div id="healthTipModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="modal-content">
-            <h2 id="modalTitle" class="modal-title">慢性病長者的健康貼士！</h2>
-            <p id="randomTipText" class="modal-tip-text"></p>
-            <button class="modal-close-button" onclick="closeModal()">知道了！</button>
+    <div class="container">
+        <h1 id="main-title" class="text-4xl font-bold text-gray-800 mb-8">食物辨識器</h1>
+        <p id="model-info" class="text-lg text-gray-600 mb-6">
+            (使用 OpenRouter: Llama 3.2 Vision - 此模型可以分析圖像！)
+        </p>
+
+        <div class="mb-8">
+            <label id="upload-label" class="block text-gray-700 text-lg font-bold mb-3" for="image-upload">
+                上傳食物圖片：
+            </label>
+            <div class="file-input-wrapper">
+                <input type="file" id="image-upload" accept="image/*">
+                <div id="choose-file-button" class="upload-button">選擇文件</div>
+            </div>
+            <img id="image-preview" src="#" alt="圖片預覽" class="mx-auto mt-5 rounded-lg shadow-md border border-gray-200">
+        </div>
+
+        <button id="detect-button" class="action-button" disabled>
+            辨識食物
+        </button>
+
+        <div id="loading-indicator" class="flex items-center justify-center space-x-3 hidden">
+            <svg class="animate-spin h-6 w-6 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span id="loading-text">正在辨識...</span>
+        </div>
+
+        <div id="results-area" class="fade-in">
+            <p id="initial-results-text" class="text-gray-700">上傳圖片並點擊「辨識食物」以查看結果。</p>
         </div>
     </div>
 
     <script>
-        const healthyTips = [
-            "**優先選擇低鈉、高纖維食物：** 為了血壓和心臟健康，選擇新鮮水果、蔬菜、全穀物和瘦肉蛋白質。限制加工食品，因為它們通常鈉含量高。",
-            "**透過明智的選擇監測血糖：** 選擇複合碳水化合物（如燕麥、糙米）和瘦肉蛋白質。避免含糖飲料和加工甜食，以有效管理血糖水平。",
-            "**選擇健康脂肪來控制膽固醇：** 攝取不飽和脂肪的來源，如牛油果、堅果、種子和橄欖油。限制油炸食品和許多包裝零食中含有的飽和脂肪和反式脂肪，以支持心臟健康。",
-            "**經醫生批准的定期運動：** 進行適合您健康狀況的體育活動，如快走、游泳或騎自行車。在開始任何新的運動計劃之前，務必諮詢您的醫生。",
-            "**堅持按時服藥是關鍵：** 嚴格按照醫囑服用所有降血壓、降血糖和降膽固醇的藥物。漏服劑量可能會導致嚴重的健康後果。",
-            "**多喝白開水保持水分：** 避免飲用含糖飲料，因為它們會導致血糖升高。水對於腎功能至關重要，並有助於管理血壓和整體新陳代謝。",
-            "**有效管理壓力：** 壓力會影響血壓和血糖。練習放鬆技巧，如深呼吸、冥想或溫和的瑜伽，以幫助控制壓力水平。",
-            "**定期體檢和監測：** 定期去看醫生對於監測您的血壓、血糖和膽固醇水平至關重要。及時討論任何變化或疑慮。",
-            "**了解食物標籤：** 學習閱讀營養標籤，以識別鈉、糖和不健康脂肪的含量。這使您能夠做出支持您健康目標的明智食物選擇。",
-            "**優先保證充足睡眠：** 良好的睡眠有助於調節影響血糖和食慾的激素，並有助於整體心血管健康。每晚爭取 7-9 小時的安穩睡眠。"
-        ];
+        const langToggleButtons = document.querySelectorAll('.lang-button');
+        const mainTitle = document.getElementById('main-title');
+        const modelInfo = document.getElementById('model-info');
+        const uploadLabel = document.getElementById('upload-label');
+        const chooseFileButton = document.getElementById('choose-file-button');
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const detectButton = document.getElementById('detect-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const loadingText = document.getElementById('loading-text');
+        const resultsArea = document.getElementById('results-area');
+        const initialResultsText = document.getElementById('initial-results-text');
 
-        function showRandomTip() {
-            const randomIndex = Math.floor(Math.random() * healthyTips.length);
-            const randomTip = healthyTips[randomIndex];
+        let base64ImageData = ''; // Store the Base64 image data
+        let currentMimeType = 'image/png'; // Default MIME type
+        let currentLanguage = 'zh'; // Default language
 
-            document.getElementById('randomTipText').innerHTML = randomTip;
+        // Translations object
+        const translations = {
+            zh: {
+                title: '食物辨識器',
+                modelInfo: '(使用 OpenRouter: Llama 3.2 Vision - 此模型可以分析圖像！)',
+                uploadLabel: '上傳食物圖片：',
+                chooseFile: '選擇文件',
+                imagePreviewAlt: '圖片預覽',
+                detectButton: '辨識食物',
+                loading: '正在辨識...',
+                initialResults: '上傳圖片並點擊「辨識食物」以查看結果。',
+                uploadPrompt: '圖片已載入並調整大小。點擊「辨識食物」進行分析。',
+                uploadFirst: '請先上傳圖片。',
+                apiError: 'OpenRouter API 錯誤:',
+                httpError: 'HTTP 錯誤:',
+                noInfo: '未能解析食物資訊。原始回應可能未按預期格式。',
+                generalError: '錯誤：',
+                tryAgain: '。請再試一次。',
+                rateLimitError: '請求過於頻繁。請稍後再試，或在 OpenRouter 上添加您自己的 API 密鑰以獲得更高限額。',
+                foodNameQuestion: '食物名稱：',
+                ingredientsQuestion: '成分：',
+                nutrientsQuestion: '主要營養素：',
+                healthyElderlyQuestion: '這種食物對老年人來說通常健康嗎？',
+                healthyElderlyDiseasesQuestion: '這種食物對於患有高血壓、高血糖、高膽固醇、心臟病、腎臟病的老年人來說通常健康嗎？'
+            },
+            en: {
+                title: 'Food Recognizer',
+                modelInfo: '(Powered by OpenRouter: Llama 3.2 Vision - This model can analyze images!)',
+                uploadLabel: 'Upload Food Image:',
+                chooseFile: 'Choose File',
+                imagePreviewAlt: 'Image Preview',
+                detectButton: 'Recognize Food',
+                loading: 'Recognizing...',
+                initialResults: 'Upload an image and click "Recognize Food" to see the results.',
+                uploadPrompt: 'Image loaded and resized. Click "Recognize Food" to analyze.',
+                uploadFirst: 'Please upload an image first.',
+                apiError: 'OpenRouter API Error:',
+                httpError: 'HTTP Error:',
+                noInfo: 'Failed to parse food information. Raw response may not be in expected format.',
+                generalError: 'Error: ',
+                tryAgain: '. Please try again.',
+                rateLimitError: 'Too many requests. Please try again shortly, or add your own API key on OpenRouter for higher limits.',
+                foodNameQuestion: 'Food Name:',
+                ingredientsQuestion: 'Ingredients:',
+                nutrientsQuestion: 'Key Nutrients:',
+                healthyElderlyQuestion: 'Is this food generally healthy for elderly people?',
+                healthyElderlyDiseasesQuestion: 'Is this food generally healthy for elderly people with high blood pressure, high blood sugar, high cholesterol, heart disease, kidney disease?'
+            }
+        };
 
-            document.getElementById('healthTipModal').classList.add('show');
+        // Function to switch language
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            mainTitle.textContent = translations[lang].title;
+            modelInfo.textContent = translations[lang].modelInfo;
+            uploadLabel.textContent = translations[lang].uploadLabel;
+            chooseFileButton.textContent = translations[lang].chooseFile;
+            imagePreview.alt = translations[lang].imagePreviewAlt;
+            detectButton.textContent = translations[lang].detectButton;
+            loadingText.textContent = translations[lang].loading;
+            
+            // Update initial results text via resetUI
+            resetUI(true); 
+
+            langToggleButtons.forEach(button => {
+                if (button.dataset.lang === lang) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
         }
 
-        function closeModal() {
-            document.getElementById('healthTipModal').classList.remove('show');
+        function resetUI(clearImage = false) {
+            if (clearImage) {
+                imagePreview.src = '#';
+                imagePreview.style.display = 'none';
+                base64ImageData = '';
+                imageUpload.value = ''; // Clear file input
+            }
+            detectButton.disabled = true;
+            resultsArea.innerHTML = `<p class="text-gray-700">${translations[currentLanguage].initialResults}</p>`;
         }
 
-        window.onload = showRandomTip;
+        langToggleButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                const lang = event.target.dataset.lang;
+                switchLanguage(lang);
+            });
+        });
+
+        /**
+         * Resizes an image to a maximum dimension while maintaining aspect ratio,
+         * then converts it to a Base64 data URL.
+         * @param {File} file The image file to resize.
+         * @param {number} maxWidth The maximum width for the resized image.
+         * @param {number} maxHeight The maximum height for the resized image.
+         * @returns {Promise<string>} A promise that resolves with the Base64 data URL of the resized image.
+         */
+        async function resizeImage(file, maxWidth, maxHeight) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Calculate new dimensions
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height *= maxWidth / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width *= maxHeight / height;
+                                height = maxHeight;
+                            }
+                        }
+
+                        // Create a canvas element
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+
+                        // Draw the image onto the canvas
+                        ctx.drawImage(img, 0, 0, width, height); 
+
+                        const outputMimeType = file.type && file.type.startsWith('image/') ? file.type : 'image/jpeg';
+                        const quality = 0.9;
+                        const dataUrl = canvas.toDataURL(outputMimeType, quality);
+                        currentMimeType = outputMimeType; // Update currentMimeType here
+
+                        resolve(dataUrl);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Event listener for image file selection
+        imageUpload.addEventListener('change', async function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const resizedDataUrl = await resizeImage(file, 1000, 1000);
+
+                imagePreview.src = resizedDataUrl;
+                imagePreview.style.display = 'block';
+
+                base64ImageData = resizedDataUrl.split(',')[1];
+                
+                detectButton.disabled = false;
+                resultsArea.innerHTML = `<p class="text-gray-700">${translations[currentLanguage].uploadPrompt}</p>`;
+            } else {
+                resetUI(true);
+            }
+        });
+
+        // Function to parse and format the AI's response
+        function parseAndFormatResponse(rawText) {
+            const lines = rawText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            const foodInfo = {};
+            
+            // Define the Chinese questions exactly as they appear in the prompt, WITHOUT the extra colon
+            const chineseQuestions = [
+                "食物名稱：",
+                "成分：",
+                "主要營養素：",
+                "這種食物對老年人來說通常健康嗎？", // Corrected: Removed extra colon
+                "這種食物對於患有高血壓、高血糖、高膽固醇、心臟病、腎臟病的老年人來說通常健康嗎？" // Corrected: Removed extra colon
+            ];
+
+            // Map the questions to their corresponding translation keys
+            const questionToKeyMap = {
+                "食物名稱：": "foodNameQuestion",
+                "成分：": "ingredientsQuestion",
+                "主要營養素：": "nutrientsQuestion",
+                "這種食物對老年人來說通常健康嗎？": "healthyElderlyQuestion", // Corrected key mapping
+                "這種食物對於患有高血壓、高血糖、高膽固醇、心臟病、腎臟病的老年人來說通常健康嗎？": "healthyElderlyDiseasesQuestion" // Corrected key mapping
+            };
+
+            lines.forEach(line => {
+                for (const question of chineseQuestions) {
+                    if (line.startsWith(question)) {
+                        const key = questionToKeyMap[question];
+                        foodInfo[key] = line.substring(question.length).trim();
+                        return;
+                    }
+                }
+            });
+
+            let formattedOutput = '';
+            if (Object.keys(foodInfo).length > 0) {
+                formattedOutput += `<p class="font-bold">${translations[currentLanguage].foodNameQuestion}${foodInfo.foodNameQuestion || 'N/A'}</p>`;
+                formattedOutput += `<p><span class="font-bold">${translations[currentLanguage].ingredientsQuestion}</span>${foodInfo.ingredientsQuestion || 'N/A'}</p>`;
+                formattedOutput += `<p><span class="font-bold">${translations[currentLanguage].nutrientsQuestion}</span>${foodInfo.nutrientsQuestion || 'N/A'}</p>`;
+                formattedOutput += `<p><span class="font-bold">${translations[currentLanguage].healthyElderlyQuestion}</span> ${foodInfo.healthyElderlyQuestion || 'N/A'}</p>`;
+                formattedOutput += `<p><span class="font-bold">${translations[currentLanguage].healthyElderlyDiseasesQuestion}</span> ${foodInfo.healthyElderlyDiseasesQuestion || 'N/A'}</p>`;
+            } else {
+                // If parsing fails, display the raw response for debugging
+                formattedOutput = `<p class="text-red-500 text-lg">${translations[currentLanguage].noInfo}</p><p class="text-gray-600 text-sm mt-2">原始回應：<br>${rawText.replace(/\n/g, '<br>')}</p>`;
+            }
+            return `<div class="fade-in">${formattedOutput}</div>`;
+        }
+
+        // Event listener for the detect button
+        detectButton.addEventListener('click', async function() {
+            // NOTE: Storing API keys directly in client-side code is INSECURE.
+            // For production, use a backend server to handle API calls.
+            const encodedstring = 'c2stb3ItdjEtYTI2ZDNjOTllMDI4NWY2NzZjMjdhZTM0Nzg4M2M2ZThlNmY4ZTY2YTJjMGNjOTBhYTBkMTIxOGFkNTA2YTJkOQ==';
+            const API_TOKEN = atob(encodedstring);
+            
+            if (!base64ImageData) {
+                resultsArea.innerHTML = `<p class="text-red-500 text-lg">${translations[currentLanguage].uploadFirst}</p>`;
+                return;
+            }
+            
+            loadingIndicator.style.display = 'flex';
+            detectButton.disabled = true;
+            resultsArea.innerHTML = ''; // Clear previous results
+
+            try {
+                const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
+                
+                // The prompt is now highly specific to ensure the desired Chinese output format
+                const prompt = `請根據提供的圖片，嚴格按照以下格式，只用中文提供以下食物資訊。所有輸出必須是中文，不要包含任何英文或其他語言。
+
+食物名稱：[食物的中文名稱，例如：蘋果、雞肉飯]
+成分：[簡短的中文成分列表，逗號分隔，例如：米、雞肉、醬油、蔬菜]
+主要營養素：[簡短的中文主要營養素列表，逗號分隔，例如：蛋白質、碳水化合物、脂肪、維生素C]
+這種食物對老年人來說通常健康嗎？[中文回答「是」或「否」，並附上非常簡短的中文原因，例如：是，因為富含纖維。或 否，因為含糖量高。]
+這種食物對於患有高血壓、高血糖、高膽固醇、心臟病、腎臟病的老年人來說通常健康嗎？[中文回答「是」或「否」，並附上非常簡短的中文原因，例如：是，因為低鈉。或 否，因為脂肪含量高。]
+
+請嚴格遵循上述格式，不要添加額外的文字或編號。`;
+
+                const mimeType = currentMimeType || 'image/png'; // Use currentMimeType
+
+                const payload = {
+                    "model": "meta-llama/llama-3.2-11b-vision-instruct:free",
+                    "messages": [
+                        { 
+                            "role": "user", 
+                            "content": [
+                                { "type": "text", "text": prompt },
+                                { "type": "image_url", "image_url": { "url": `data:${mimeType};base64,${base64ImageData}` } }
+                            ]
+                        }
+                    ],
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_TOKEN}`,
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const responseBodyText = await response.text();
+                    let errorDetails = `${translations[currentLanguage].httpError} ${response.status} ${response.statusText}`;
+                    try {
+                        const jsonError = JSON.parse(responseBodyText);
+                        if (response.status === 429) {
+                            errorDetails = translations[currentLanguage].rateLimitError;
+                        } else {
+                            errorDetails += ` - ${JSON.stringify(jsonError)}`;
+                        }
+                    } catch (e) {
+                        errorDetails += ` - ${responseBodyText}`;
+                    }
+                    throw new Error(`${translations[currentLanguage].apiError} ${errorDetails}`);
+                }
+
+                const result = await response.json();
+
+                if (result && result.choices && result.choices.length > 0 && result.choices[0].message && result.choices[0].message.content) {
+                    const rawText = result.choices[0].message.content;
+                    resultsArea.innerHTML = parseAndFormatResponse(rawText);
+                } else {
+                    resultsArea.innerHTML = `<p class="text-red-500 text-lg">${translations[currentLanguage].noInfo}</p>`;
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                if (error.message.includes(translations[currentLanguage].rateLimitError)) {
+                    resultsArea.innerHTML = `<p class="text-red-500 text-lg">${error.message}</p>`;
+                } else {
+                    resultsArea.innerHTML = `<p class="text-red-500 text-lg">${translations[currentLanguage].generalError}${error.message}${translations[currentLanguage].tryAgain}</p>`;
+                }
+            } finally {
+                loadingIndicator.style.display = 'none';
+                detectButton.disabled = false;
+            }
+        });
+
+        // Initialize with Chinese content visible
+        switchLanguage('zh');
     </script>
 </body>
 </html>
